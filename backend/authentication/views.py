@@ -6,28 +6,28 @@ from .models import Account
 import json
 
 
-class Login(generics.ListAPIView):
-    # def post(self, request, format=None):
-    #     username = request.data.get("username")
-    #     password = request.data.get("password")
+class Login(APIView):
+    def post(self, request, format=None):
+        username = request.data.get("username")
+        password = request.data.get("password")
 
-    #     print(Account.objects.all().first())
-    #     result_set = Account.objects.filter(username=username, password=password)
+        result_set = Account.objects.filter(username=username, password=password)
 
-    #     if result_set.exists():
-    #         return JsonResponse({"user": json.dumps(result_set.first())})
+        if result_set.exists():
+            user = result_set.first()
+            return JsonResponse(
+                {
+                    "user": {
+                        "username": user.username,
+                        "email": user.email,
+                        "gender": user.gender,
+                    }
+                }
+            )
 
-    #     return JsonResponse({"message": "Invalid credentials"}, status=401)
-
-    serializer_class = AccountSerializer
-    
-    def get_queryset(self):
-        username = self.request.data.get("username")
-        password = self.request.data.get("password")
-        return Account.objects.filter(username=username, password=password)
+        return JsonResponse({"message": "Invalid credentials"}, status=401)
 
 
 class SignUp(generics.CreateAPIView):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
-    
