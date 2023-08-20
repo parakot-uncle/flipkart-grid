@@ -39,15 +39,22 @@ output_parser = CommaSeparatedListOutputParser()
 
 fashion_df = pd.read_csv(item_data)
 
-pattern = r'\b\d{4,5}\b'  # Match 4 to 5 digits
+pattern = r"\b\d{4,5}\b"  # Match 4 to 5 digits
+
+
+def extract_ids(arr):
+    extracted_ids = []
+
+    for item in arr:
+        matches = re.findall(pattern, item)
+        extracted_ids.extend(matches)
+
+    return extracted_ids
+
 
 def get_item_details_from_id(item_id):
-    print(type(item_id), item_id)
     try:
-        id = int(re.findall(pattern, item_id)[0])
-    except:
         id = int(item_id)
-    try:
         row = fashion_df[fashion_df["id"] == id]
         image = row["link"].values[0]
         category = row["subCategory"].values[0].lower()
@@ -81,8 +88,9 @@ class OutfitSelection(APIView):
             item2 = keys[1]
             query = f"Get 3 unique {category[0]} where {item1} = {selected_items[item1]} and {item2} = {selected_items[item2]}"
             result = output_parser.parse(recommender_agent.run(query))
+            extracted_result = extract_ids(result)
             res = []
-            for id in result:
+            for id in extracted_result:
                 res.append(get_item_details_from_id(id))
             return JsonResponse({str(categories[0]): res})
 
@@ -90,27 +98,32 @@ class OutfitSelection(APIView):
         result = []
         query = f"Get 3 unique {categories[0]} where {item1} = {selected_items[item1]}"
         result1 = output_parser.parse(recommender_agent.run(query))
+        extracted_result1 = extract_ids(result1)
         res1 = []
 
-        for id in result1:
+        for id in extracted_result1:
             res1.append(get_item_details_from_id(id))
 
         query = f"Get 2 unique {categories[1]} where {item1} = {selected_items[item1]} and {categories[0]} = "
-        for i in range(len(result)):
-            query += str(result[i]) + " "
-            if i < len(result) - 1:
+        for i in range(len(extracted_result1)):
+            query += str(extracted_result1[i]) + " "
+            if i < len(extracted_result1) - 1:
                 query += "or "
+        print("query", query)
         result2 = output_parser.parse(recommender_agent.run(query))
+        extracted_result2 = extract_ids(result2)
         res2 = []
 
-        for id in result2:
+        for id in extracted_result2:
             res2.append(get_item_details_from_id(id))
         return JsonResponse({str(categories[0]): res1, str(categories[1]): res2})
 
 
 class OutfitPromptList(APIView):
     def post(self, request, format=None):
-        query = f"{request.data.get('query')} for {request.data.get('gender')} (Get 5 ids)"
+        query = (
+            f"{request.data.get('query')} for {request.data.get('gender')} (Get 5 ids)"
+        )
 
         previous_queries = request.data.get("previous_queries")
         if len(previous_queries) > 0:
@@ -125,3 +138,10 @@ class OutfitPromptList(APIView):
             res.append(get_item_details_from_id(id))
 
         return JsonResponse({"results": res})
+
+
+class OutfitList(generics.ListCreateAPIView):
+    serializer_class = OutfitSerializer
+
+    def get_queryset(self):
+        return Outfit.useroutfits.filter(user=self.request.query_params.get("user"))

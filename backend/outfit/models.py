@@ -1,4 +1,5 @@
 from django.db import models
+from authentication.models import Account
 
 GENDER_CHOICES = (("girl", "girl"), ("boy", "boy"), ("man", "man"), ("woman", "woman"))
 
@@ -13,10 +14,18 @@ OCCASION_CHOICES = (
     ("home", "home"))
 
 class Outfit(models.Model):
+    class OutfitManager(models.Manager):
+        def get_queryset(self):
+            return super().get_queryset().filter(user=models.F('user'))
+
     topwear = models.IntegerField()
     bottomwear = models.IntegerField()
-    footwear = models.IntegerField()
+    shoes = models.IntegerField()
     gender = models.CharField(choices=GENDER_CHOICES, max_length=15)
+    # user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
+
+    objects = models.Manager()
+    useroutfits = OutfitManager()
 
 
 class Outfit_Accessory(models.Model):

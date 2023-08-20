@@ -43,7 +43,7 @@ llm = OpenAI()
 def csv_agent(input):
     id_agent = create_csv_agent(
         llm,
-        item_data,
+        mapped_outfits,
         verbose=True,
         # agent_type=AgentType.OPENAI_FUNCTIONS,
     )
@@ -114,26 +114,30 @@ agent_chain = AgentExecutor.from_agent_and_tools(
 # res = agent_chain.run(" a top for females in the same colour (get 5 ids)")
 # print(res)
 
-agent = csv_agent("")
-# res = agent.run("Get 2 shoes where topwear = 15870 and bottomwear = 21382 or bottomwear = 23870")
-output_parser = CommaSeparatedListOutputParser()
-res = output_parser.parse(agent.run("Get jeans of the same colour. (get 5 ids). extract information from previous query - I want to wear a black shirt"))
-print(res, type(res))
+# agent = csv_agent("")
+# # res = agent.run("Get 2 shoes where topwear = 15870 and bottomwear = 21382 or bottomwear = 23870")
+# output_parser = CommaSeparatedListOutputParser()
+# res = output_parser.parse(agent.run("Get 2 unique shoes where topwear = 7504 and bottomwear = 28456 or 18002 or 28458"))
+# print(res, type(res))
 
 # df = pd.read_csv(item_data)
 # row = df[df["id"] == 15970]
 # link = row["link"].values[0]
 # print(link)
 
-# import re
+import re
 
-# data = ['The 5 ids for black shirts are 6617', '12500', '11143', '11371', 'and 11144.']
+data = ['The two unique shoes are 46086 and 36137.', '18903'] 
 
-# pattern = r'\b\d{4,5}\b'  # Match 4 to 5 digits
-# numbers = []
+pattern = r'\b\d{4,5}\b'  # Match 4 to 5 digits
+numbers = []
 
-# for item in data:
-#     matches = re.findall(pattern, item)
-#     print(matches)
+for item in data:
+    matches = re.findall(pattern, item)
+    numbers.extend(matches)
+    print(matches)
 
-# print(numbers)
+print(numbers)
+
+# bottomwear = 28456, 18002, 28458
+# footwear = 11949, 22165
