@@ -21,6 +21,7 @@ class Login(APIView):
                         "username": user.username,
                         "email": user.email,
                         "gender": user.gender,
+                        "id": user.id
                     }
                 }
             )
