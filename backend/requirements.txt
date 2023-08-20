@@ -1,0 +1,13 @@
+django
+djangorestframework
+django-cors-headers
+langchain
+python-dotenv
+langchain_experimental
+openai
+pandas
+numpy
+tabulate
+tiktoken
+huggingface_hub
+chromadb
