@@ -6,7 +6,7 @@ class Account(models.Model):
     email = models.EmailField()
     password = models.CharField(max_length=8)
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES)
-    username = models.CharField(max_length=20)
+    username = models.CharField(max_length=50)
 
     def __str__(self):
         return self.username
