@@ -12,9 +12,12 @@ class Login(APIView):
         password = request.data.get("password")
 
         result_set = Account.objects.filter(username=username, password=password)
+        print(username, password)
+        print(result_set.first())
 
         if result_set.exists():
             user = result_set.first()
+            print(user)
             return JsonResponse(
                 {
                     "user": {
