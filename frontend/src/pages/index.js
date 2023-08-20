@@ -124,14 +124,16 @@ export default function Home() {
 			</div>
 			<div className="my-1">Elevate Your Style with Every Word</div>
 			<div>
-				<Link href="/chat">
-					<button className="px-5 py-1 my-2 mx-2 bg-[#f5f5f5]  rounded-md font-semibold text-lg hover:bg-[#fafafa] transition-all duration-300">
+				<Link href="/login">
+					<button className="px-5 py-1 my-2 mx-2 bg-slate-300  rounded-md font-semibold text-lg hover:bg-[#fff] transition-all duration-200">
 						Login
 					</button>
 				</Link>
-				<button className="px-5 py-1 my-2 mx-2 bg-green-500 rounded-md font-semibold text-lg hover:bg-green-400 transition-all duration-300">
-					Sign Up
-				</button>
+				<Link href="/signup">
+					<button className="px-5 py-1 my-2 mx-2 bg-green-500 rounded-md font-semibold text-lg hover:bg-green-400 transition-all duration-200">
+						Sign Up
+					</button>
+				</Link>
 			</div>
 		</div>
   );

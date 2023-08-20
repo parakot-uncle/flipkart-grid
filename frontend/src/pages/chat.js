@@ -8,11 +8,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useRef, useState, useEffect } from "react";
 import EditModal from "@/components/Modal";
+import axios from "axios";
+import { ClapSpinner } from "react-spinners-kit";
 
 export default function chat() {
 	const [query, setQuery] = useState("");
+	const [loading, setLoading] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 	const [product, setProduct] = useState({});
+	let currOutfit = {};
 	const [outfit, setOutfit] = useState({
 		topwear: {},
 		bottomwear: {},
@@ -21,151 +25,46 @@ export default function chat() {
 	const [showOutfit, setShowOutfit] = useState(false);
 	const textareaRef = useRef();
 	const finalRef = useRef();
-	const [conversation, setConversation] = useState([
-		{
-			user: true,
-			message: "Hey",
-			image: false,
-			recommendation: false,
-		},
-		{
-			user: false,
-			message: "Response",
-			image: false,
-			recommendation: false,
-		},
-		{
-			user: false,
-			message: [
-				{
-					id: "1",
-					name: "Blue shirt",
-					image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shirt/z/g/d/xl-st2-vebnor-original-imagpw72vhqfczsp.jpeg?q=90",
-					gender: "Men",
-					cat: "Topwear",
-				},
-				{
-					id: "2",
-					name: "Blue shirt",
-					image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shirt/z/g/d/xl-st2-vebnor-original-imagpw72vhqfczsp.jpeg?q=90",
-					gender: "Men",
-					cat: "Topwear",
-				},
-				{
-					id: "3",
-					name: "Blue shirt",
-					image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shirt/z/g/d/xl-st2-vebnor-original-imagpw72vhqfczsp.jpeg?q=90",
-					gender: "Men",
-					cat: "Topwear",
-				},
-				{
-					id: "4",
-					name: "Blue shirt",
-					image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shirt/z/g/d/xl-st2-vebnor-original-imagpw72vhqfczsp.jpeg?q=90",
-					gender: "Men",
-					category: "Shirts",
-					cat: "Topwear",
-				},
-				{
-					id: "5",
-					name: "Blue shirt",
-					price: "300",
-					image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shirt/z/g/d/xl-st2-vebnor-original-imagpw72vhqfczsp.jpeg?q=90",
-					gender: "Men",
-					category: "Shirts",
-					cat: "Topwear",
-				},
-				{
-					id: "6",
-					name: "Blue shirt",
-					price: "300",
-					image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shirt/z/g/d/xl-st2-vebnor-original-imagpw72vhqfczsp.jpeg?q=90",
-					gender: "Men",
-					category: "Shirts",
-					cat: "Topwear",
-				},
-			],
-			image: true,
-			recommendation: [
-				{
-					id: "10",
-					name: "Grey Pants",
-					price: "500",
-					image: "https://assets.ajio.com/medias/sys_master/root/20221230/wXVL/63aec149aeb269659c17e981/-473Wx593H-443007815-ltgrey-MODEL.jpg",
-					gender: "Women",
-					category: "Pants",
-					cat: "Bottomwear",
-				},
-				{
-					id: "20",
-					name: "Grey Pants",
-					price: "500",
-					image: "https://assets.ajio.com/medias/sys_master/root/20221230/wXVL/63aec149aeb269659c17e981/-473Wx593H-443007815-ltgrey-MODEL.jpg",
-					gender: "Women",
-					category: "Pants",
-					cat: "Bottomwear",
-				},
-				{
-					id: "30",
-					name: "Grey Pants",
-					price: "500",
-					image: "https://assets.ajio.com/medias/sys_master/root/20221230/wXVL/63aec149aeb269659c17e981/-473Wx593H-443007815-ltgrey-MODEL.jpg",
-					gender: "Women",
-					category: "Pants",
-					cat: "Bottomwear",
-				},
-				{
-					id: "40",
-					name: "Grey Pants",
-					price: "500",
-					image: "https://assets.ajio.com/medias/sys_master/root/20221230/wXVL/63aec149aeb269659c17e981/-473Wx593H-443007815-ltgrey-MODEL.jpg",
-					gender: "Women",
-					category: "Pants",
-					cat: "Bottomwear",
-				},
-				{
-					id: "50",
-					name: "Grey Pants",
-					price: "500",
-					image: "https://assets.ajio.com/medias/sys_master/root/20221230/wXVL/63aec149aeb269659c17e981/-473Wx593H-443007815-ltgrey-MODEL.jpg",
-					gender: "Women",
-					category: "Pants",
-					cat: "Bottomwear",
-				},
-				{
-					id: "60",
-					name: "Grey Pants",
-					price: "500",
-					image: "https://assets.ajio.com/medias/sys_master/root/20221230/wXVL/63aec149aeb269659c17e981/-473Wx593H-443007815-ltgrey-MODEL.jpg",
-					gender: "Women",
-					category: "Pants",
-					cat: "Bottomwear",
-				},
-			],
-		},
-	]);
-	function submitHandler(e) {
+	const [conversation, setConversation] = useState([]);
+	async function submitHandler(e) {
 		e.preventDefault();
-		let con = conversation;
-		con.push({
-			user: true,
-			message: query,
-		});
-		setConversation(con);
-		const convo = con.filter((msg) => {
-			return msg.user === true;
-		});
-		console.log(convo.slice(-3));
-		setQuery("");
-		
-		con.push({
-			user: false,
-			message: "Response",
-			image: false,
-			recommendation: false,
-		});
-		setConversation(con);
-		console.log(conversation);
+		setLoading(true);
+		// console.log(query)
+		// let con = conversation;
+		// con.push({
+		// 	user: true,
+		// 	message: query,
+		// 	image: false,
+		// 	recommendation: false,
+		// });
+		// setConversation(con);
+		// let convo = con.filter((msg) => {
+		// 	return msg.user === true;
+		// }).map((msg) => {
+		// 	return msg.message
+		// });
+		// console.log(convo.slice(-3));
+		// const converse = convo.slice(0,convo.length-1)
+		// console.log(converse)
+		// const response = await axios.post("http://localhost:8000/api/outfit/prompt-outfit", {
+		// 	"query": query,
+		// 	"previous_queries": converse,
+		// 	"gender": "Women"
+		// })
+		// console.log(response)
+		// setQuery("");
+
+		// con.push({
+		// 	user: false,
+		// 	message: response.data.results,
+		// 	image: true,
+		// 	recommendation: [],
+		// });
+		// setConversation(con);
+		// console.log(conversation);
+		setTimeout(() => {
+			setLoading(false);
+		}, 5000);
 	}
 	useEffect(() => {
 		textareaRef.current.style.height = "0px";
@@ -181,6 +80,54 @@ export default function chat() {
 			});
 		}
 	}, [conversation.length]);
+	useEffect(() => {
+		if (outfit.topwear.id) {
+			currOutfit.topwear = outfit.topwear.id;
+		}
+		if (outfit.bottomwear.id) {
+			currOutfit.bottomwear = outfit.bottomwear.id;
+		}
+		if (outfit.shoes.id) {
+			currOutfit.shoes = outfit.shoes.id;
+		}
+		console.log(currOutfit);
+		if (
+			(currOutfit.topwear || currOutfit.bottomwear || currOutfit.shoes) &&
+			!(currOutfit.topwear && currOutfit.bottomwear && currOutfit.shoes)
+		) {
+			getRecommendations(currOutfit);
+		}
+	}, [outfit]);
+	async function getRecommendations(outfit) {
+		setLoading(true);
+		// const response = await axios.post(
+		// 	"http://localhost:8000/api/outfit/select-outfit",
+		// 	{
+		// 		selected_items: outfit,
+		// 	}
+		// );
+		// let lastMsg = conversation[conversation.length-1].recommendation
+		// if(response.data.topwear){
+		// 	lastMsg = lastMsg.concat(response.data.topwear)
+		// }
+		// if(response.data.bottomwear){
+		// 	lastMsg = lastMsg.concat(response.data.bottomwear)
+		// }
+		// if (response.data.shoes) {
+		// 	lastMsg = lastMsg.concat(response.data.shoes);
+		// }
+		// console.log(lastMsg)
+		// setConversation((prevState) => {
+		// 	let newState = [...prevState];
+		// 	console.log(newState)
+		// 	newState[newState.length-1].recommendation = lastMsg
+		// 	console.log(newState)
+		// 	return newState
+		// })
+		setTimeout(() => {
+			setLoading(false);
+		}, 5000);
+	}
 	function outfitDetails(outfit) {
 		let outfitName = "";
 		let outfitPrice = 0;
@@ -220,9 +167,13 @@ export default function chat() {
 		return [outfitName, outfitPrice];
 	}
 	const outfitDet = outfitDetails(outfit);
+	console.log(outfit);
 	return (
 		<div>
-			<Navbar showOutfit={showOutfit} setShowOutfit={setShowOutfit}/>
+			<Navbar showOutfit={showOutfit} setShowOutfit={setShowOutfit} />
+			<div className="absolute ml-[48%] mt-[17%] z-10">
+				<ClapSpinner loading={loading} />
+			</div>
 			<div className="h-full px-32 ">
 				{(showModal || showOutfit) && (
 					<EditModal
@@ -267,10 +218,6 @@ export default function chat() {
 										<></>
 									)}
 								</div>
-								<div className="my-2 text-lg">
-									<span className=" font-bold">Price:</span> ₹
-									{outfitDet[1]}
-								</div>
 							</div>
 						) : (
 							<div className="flex flex-row">
@@ -282,9 +229,6 @@ export default function chat() {
 								<div className="flex flex-col mx-5 justify-center w-full">
 									<div className="my-3 text-lg">
 										Name: {product.name}
-									</div>
-									<div className="my-3 text-lg">
-										Price: ₹{product.price}
 									</div>
 									<div className="my-3 text-lg">
 										Gender:
@@ -315,7 +259,8 @@ export default function chat() {
 													// console.log(product)
 													setOutfit({
 														...outfit,
-														[product.cat.toLowerCase()]: {},
+														[product.category.toLowerCase()]:
+															{},
 													});
 													setShowModal(false);
 												}}
@@ -325,14 +270,15 @@ export default function chat() {
 										) : (
 											<button
 												className="bg-green-500 text-white px-3 py-2 rounded-sm"
-												onClick={() => {
-													console.log(product.cat.toLowerCase())
+												onClick={async () => {
+													// console.log(product.cat.toLowerCase())
 													setOutfit({
 														...outfit,
-														[product.cat.toLowerCase()]:
+														[product.category.toLowerCase()]:
 															product,
 													});
 													setShowModal(false);
+													console.log(currOutfit);
 												}}
 											>
 												Select
@@ -371,6 +317,7 @@ export default function chat() {
 													<div className="grid grid-cols-5 gap-2 py-2 ">
 														{msg.recommendation.map(
 															(img, indexI) => {
+																// console.log("Hello sir"+indexI)
 																return (
 																	<img
 																		key={
@@ -415,6 +362,7 @@ export default function chat() {
 													<div className="grid grid-cols-5 gap-2 py-2">
 														{msg.message.map(
 															(img, indexImg) => {
+																// console.log(img)
 																return (
 																	<img
 																		key={
@@ -484,6 +432,11 @@ export default function chat() {
 							onChange={(e) => setQuery(e.target.value)}
 							className="px-3 bg-transparent w-full resize-none outline-0"
 							placeholder="Write your message"
+							onKeyDown={(e) => {
+								if (e.key == "Enter") {
+									submitHandler(e);
+								}
+							}}
 							ref={textareaRef}
 						/>
 						<div className="text-white bg-green-600 w-10 h-10 flex items-center justify-center rounded-sm cursor-pointer">
