@@ -1,24 +1,26 @@
-from rest_framework import generics
-from .models import Outfit, Outfit_Occasion, Outfit_Accessory
-from .serializers import (
-    OutfitSerializer,
-    OutfitAccessorySerializer,
-    OutfitOccasionSerializer,
-)
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from langchain.llms import OpenAI
-from langchain.utilities import SQLDatabase
-from langchain_experimental.sql import SQLDatabaseChain
+import json
+import os
+import re
+
+import pandas as pd
+import requests
+from django.http import JsonResponse
+from dotenv import load_dotenv
 from langchain.agents import create_csv_agent
 from langchain.agents.agent_types import AgentType
-import os
-from dotenv import load_dotenv
-import json
-from django.http import JsonResponse
+from langchain.llms import OpenAI
 from langchain.output_parsers import CommaSeparatedListOutputParser
-import pandas as pd
-import re
+from langchain.utilities import SQLDatabase
+from langchain_experimental.sql import SQLDatabaseChain
+from PIL import Image
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from vton.pipe import runPipeline
+
+from .models import Outfit, Outfit_Accessory, Outfit_Occasion
+from .serializers import (OutfitAccessorySerializer, OutfitOccasionSerializer,
+                          OutfitSerializer)
 
 load_dotenv()
 
@@ -143,5 +145,36 @@ class OutfitPromptList(APIView):
 class OutfitList(generics.ListCreateAPIView):
     serializer_class = OutfitSerializer
 
-    def get_queryset(self):
-        return Outfit.objects.filter(user=self.request.query_params.get("user"))
+    def get(self, request, *args, **kwargs):
+        result_set = Outfit.objects.filter(user=self.request.query_params.get("user"))
+        res = []
+        for obj in list(result_set):
+            ans = {
+                "topwear": get_item_details_from_id(obj["topwear"]),
+                "bottomwear": get_item_details_from_id(obj["topwear"]),
+                "shoes": get_item_details_from_id(obj["topwear"])
+            }
+            res.append(ans)
+
+        return JsonResponse({"outfits": res})
+
+
+class OutfitPreview(generics.RetrieveAPIView):
+    def get(self, request, *args, **kwargs):
+        id = self.kwargs["pk"]
+        item = get_item_details_from_id(id)
+
+        data = requests.get(item["image"]).content
+        print(os.getcwd())
+
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the relative path to the 'cloth_image' directory
+        cloth_image_relative_path = os.path.join(current_directory, '..', 'data', 'cloth_image')
+
+        f = open(f"{cloth_image_relative_path}/{id}.jpg",'wb')
+  
+        f.write(data)
+        f.close()
+
+        runPipeline(id)
