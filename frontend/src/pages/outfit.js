@@ -1,26 +1,16 @@
 import Navbar from "@/components/Navbar";
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export default function Outfit(){
-    const [outfits, setOutfits] = useState([
-		[
-			{
-				name: "Blue shirt",
-				price: "300",
-				image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shirt/z/g/d/xl-st2-vebnor-original-imagpw72vhqfczsp.jpeg?q=90",
-				gender: "Men",
-				category: "Shirts",
-			},{
-				name: "Grey Pants",
-				price: "500",
-				image: "https://assets.ajio.com/medias/sys_master/root/20221230/wXVL/63aec149aeb269659c17e981/-473Wx593H-443007815-ltgrey-MODEL.jpg",
-				gender: "Women",
-				category: "Pants",
-			},
-		],
-		
-	]);
-
+    const [outfits, setOutfits] = useState([]);
+	useEffect(() => {
+		async function getPreviousOutfits(){
+			const response = await axios.get(`http://localhost:8000/api/outfit/?user=${localStorage.getItem("user_id")}`);
+			setOutfits(response.data)
+		}
+		getPreviousOutfits()
+	}, [])
     function outfitDetails(outfit){
         let outfitName = ""
         let outfitPrice = 0
@@ -32,11 +22,10 @@ export default function Outfit(){
             else{
                 outfitName += element.name
             }
-            outfitPrice += parseInt(element.price)
         }
         return ([outfitName, outfitPrice])
     }
-
+	console.log(outfits)
     return (
 		<div className="">
 			<Navbar />
@@ -50,16 +39,25 @@ export default function Outfit(){
 								{outfitDet[0]}
 							</div>
 							<div className="flex flex-row my-2">
-								{outfit.map((wear, j) => {
-									return (
-										<div key={j} className="mx-2 flex justify-center items-center">
-											<img src={wear.image} alt="" className="w-40"/>
-										</div>
-									);
-								})}
-							</div>
-							<div className="text-lg">
-								Price: ₹{outfitDet[1]}
+								<div
+									className="mx-2 flex flex-row justify-center items-center"
+								>
+									<img
+										src={outfit.topwear.image}
+										alt=""
+										className="w-40"
+									/>
+									<img
+										src={outfit.bottomwear.image}
+										alt=""
+										className="w-40"
+									/>
+									<img
+										src={outfit.shoes.image}
+										alt=""
+										className="w-40"
+									/>
+								</div>
 							</div>
 						</div>
 					);

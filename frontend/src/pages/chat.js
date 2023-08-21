@@ -29,42 +29,40 @@ export default function chat() {
 	async function submitHandler(e) {
 		e.preventDefault();
 		setLoading(true);
-		// console.log(query)
-		// let con = conversation;
-		// con.push({
-		// 	user: true,
-		// 	message: query,
-		// 	image: false,
-		// 	recommendation: false,
-		// });
-		// setConversation(con);
-		// let convo = con.filter((msg) => {
-		// 	return msg.user === true;
-		// }).map((msg) => {
-		// 	return msg.message
-		// });
-		// console.log(convo.slice(-3));
-		// const converse = convo.slice(0,convo.length-1)
-		// console.log(converse)
-		// const response = await axios.post("http://localhost:8000/api/outfit/prompt-outfit", {
-		// 	"query": query,
-		// 	"previous_queries": converse,
-		// 	"gender": "Women"
-		// })
-		// console.log(response)
-		// setQuery("");
+		console.log(query)
+		let con = conversation;
+		con.push({
+			user: true,
+			message: query,
+			image: false,
+			recommendation: false,
+		});
+		setConversation(con);
+		let convo = con.filter((msg) => {
+			return msg.user === true;
+		}).map((msg) => {
+			return msg.message
+		});
+		console.log(convo.slice(-3));
+		const converse = convo.slice(0,convo.length-1)
+		console.log(converse)
+		const response = await axios.post("http://localhost:8000/api/outfit/prompt-outfit", {
+			"query": query,
+			"previous_queries": converse,
+			"gender": localStorage.getItem("gender")
+		})
+		console.log(response)
+		setQuery("");
 
-		// con.push({
-		// 	user: false,
-		// 	message: response.data.results,
-		// 	image: true,
-		// 	recommendation: [],
-		// });
-		// setConversation(con);
-		// console.log(conversation);
-		setTimeout(() => {
-			setLoading(false);
-		}, 5000);
+		con.push({
+			user: false,
+			message: response.data.results,
+			image: true,
+			recommendation: [],
+		});
+		setConversation(con);
+		console.log(conversation);
+		setLoading(false);
 	}
 	useEffect(() => {
 		textareaRef.current.style.height = "0px";
@@ -100,33 +98,31 @@ export default function chat() {
 	}, [outfit]);
 	async function getRecommendations(outfit) {
 		setLoading(true);
-		// const response = await axios.post(
-		// 	"http://localhost:8000/api/outfit/select-outfit",
-		// 	{
-		// 		selected_items: outfit,
-		// 	}
-		// );
-		// let lastMsg = conversation[conversation.length-1].recommendation
-		// if(response.data.topwear){
-		// 	lastMsg = lastMsg.concat(response.data.topwear)
-		// }
-		// if(response.data.bottomwear){
-		// 	lastMsg = lastMsg.concat(response.data.bottomwear)
-		// }
-		// if (response.data.shoes) {
-		// 	lastMsg = lastMsg.concat(response.data.shoes);
-		// }
-		// console.log(lastMsg)
-		// setConversation((prevState) => {
-		// 	let newState = [...prevState];
-		// 	console.log(newState)
-		// 	newState[newState.length-1].recommendation = lastMsg
-		// 	console.log(newState)
-		// 	return newState
-		// })
-		setTimeout(() => {
-			setLoading(false);
-		}, 5000);
+		const response = await axios.post(
+			"http://localhost:8000/api/outfit/select-outfit",
+			{
+				selected_items: outfit,
+			}
+		);
+		let lastMsg = conversation[conversation.length-1].recommendation
+		if(response.data.topwear){
+			lastMsg = lastMsg.concat(response.data.topwear)
+		}
+		if(response.data.bottomwear){
+			lastMsg = lastMsg.concat(response.data.bottomwear)
+		}
+		if (response.data.shoes) {
+			lastMsg = lastMsg.concat(response.data.shoes);
+		}
+		console.log(lastMsg)
+		setConversation((prevState) => {
+			let newState = [...prevState];
+			console.log(newState)
+			newState[newState.length-1].recommendation = lastMsg
+			console.log(newState)
+			return newState
+		})
+		setLoading(false);
 	}
 	function outfitDetails(outfit) {
 		let outfitName = "";
@@ -165,6 +161,23 @@ export default function chat() {
 			}
 		}
 		return [outfitName, outfitPrice];
+	}
+	async function saveOutfit(){
+		console.log(currOutfit)
+		if(outfit.topwear.id || outfit.bottomwear.id || outfit.shoes.id){
+			console.log(outfit)
+			const response = await axios.post(
+				"http://localhost:8000/api/outfit/",
+				{
+					user: parseInt(localStorage.getItem("user_id")),
+					gender: localStorage.getItem("gender"),
+					topwear: outfit.topwear.id,
+					bottomwear: outfit.bottomwear.id?outfit.bottomwear.id:0,
+					shoes: outfit.shoes.id?outfit.shoes.id:0,
+				}
+			);
+			console.log(response);
+		}
 	}
 	const outfitDet = outfitDetails(outfit);
 	console.log(outfit);
@@ -218,6 +231,9 @@ export default function chat() {
 										<></>
 									)}
 								</div>
+								{(outfit.bottomwear.image || outfit.topwear.image || outfit.shoes.image) && (<button className="bg-green-500 text-white px-3 py-2" onClick={saveOutfit}>
+										Save Outfit
+								</button>)}
 							</div>
 						) : (
 							<div className="flex flex-row">
