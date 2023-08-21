@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { ClapSpinner } from "react-spinners-kit";
 import { useRouter } from "next/router";
+import axios from "axios";
 
 export default function Signup(){
     const [email, setEmail] = useState('')
@@ -15,16 +16,18 @@ export default function Signup(){
     const [dropdown, setDropdown] = useState(false)
     const [loading, setLoading] = useState(false);
     const router = useRouter()
-    function submitHandler(e){
+    async function submitHandler(e){
         e.preventDefault();
         setLoading(true)
         if(password===confirmPassword && gender!=="Set Gender"){
-            const output = {
+            const user = {
 				"email": email,
+                "username": email,
 				"password": password,
-                "gender": gender
+                "gender": gender.toLowerCase()
 			};
-            console.log(output)
+            const response = await axios.post("http://localhost:8000/api/authentication/signup/", user);
+            console.log(response.data)
             router.push("/login");
         }
         else{
@@ -77,7 +80,10 @@ export default function Signup(){
 								gender === "Set Gender"
 									? "text-[#aaa]"
 									: "text-black"
-							} bg-white my-2 text-lg rounded-sm flex flex-row`}
+							} bg-white my-2 text-lg rounded-sm flex flex-row cursor-pointer`}
+							onClick={() => {
+								setDropdown(!dropdown);
+							}}
 						>
 							<div>{gender}</div>
 							<div
@@ -115,7 +121,10 @@ export default function Signup(){
 								</div>
 							</div>
 						)}
-						<button className="bg-green-500 my-2 px-3 py-2 rounded-sm text-white text-lg w-full" onClick={submitHandler}>
+						<button
+							className="bg-green-500 my-2 px-3 py-2 rounded-sm text-white text-lg w-full"
+							onClick={submitHandler}
+						>
 							Sign Up
 						</button>
 					</div>

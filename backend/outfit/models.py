@@ -14,19 +14,11 @@ OCCASION_CHOICES = (
     ("home", "home"))
 
 class Outfit(models.Model):
-    class OutfitManager(models.Manager):
-        def get_queryset(self):
-            return super().get_queryset().filter(user=models.F('user'))
-
     topwear = models.IntegerField()
     bottomwear = models.IntegerField()
     shoes = models.IntegerField()
     gender = models.CharField(choices=GENDER_CHOICES, max_length=15)
-    # user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
-
-    objects = models.Manager()
-    useroutfits = OutfitManager()
-
+    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
 
 class Outfit_Accessory(models.Model):
     outfit = models.ForeignKey(Outfit, on_delete=models.CASCADE)

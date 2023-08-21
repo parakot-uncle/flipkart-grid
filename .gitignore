@@ -1,4 +1,7 @@
-/backend/venv
-/frontend/node_modules
-/frontend/.next
-/backend/chroma_db
+backend/venv
+frontend/node_modules
+frontend/.next
+backend/chroma_db
+backend/authentication/__pycache__/
+backend/backend/__pycache__/
+backend/outfit/__pycache__/

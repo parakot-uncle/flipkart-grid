@@ -3,6 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/login": "pages/login.js",
+  "/outfit": "pages/outfit.js",
   "/": "pages/index.js",
   "/chat": "pages/chat.js"
 }

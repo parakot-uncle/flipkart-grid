@@ -144,4 +144,4 @@ class OutfitList(generics.ListCreateAPIView):
     serializer_class = OutfitSerializer
 
     def get_queryset(self):
-        return Outfit.useroutfits.filter(user=self.request.query_params.get("user"))
+        return Outfit.objects.filter(user=self.request.query_params.get("user"))

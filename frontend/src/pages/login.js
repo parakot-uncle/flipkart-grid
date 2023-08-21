@@ -1,20 +1,26 @@
+import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
 
 export default function Login(){
     const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 	const router = useRouter();
-    function submitHandler(e) {
+    async function submitHandler(e) {
         e.preventDefault();
         setLoading(true)
         const user = {
-            "email": email,
+            "username": email,
             "password": password
         }
-        // localStorage.setItem("user", ...user)
+        const response = await axios.post("http://localhost:8000/api/authentication/login/", user);
+        const userDet = response.data.user
+        localStorage.setItem("gender", userDet.gender)
+        localStorage.setItem("email", userDet.email)
+        localStorage.setItem("user_id", userDet.id)
         router.push('/chat')
         setLoading(false)
     }
